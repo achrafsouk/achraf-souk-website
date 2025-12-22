@@ -58,7 +58,6 @@ npm run preview
 This website is fully optimized for static hosting. Build manually and deploy the `dist/` folder:
 ```bash
 npm run build
-cp -r assets/* dist/assets/
 # Upload contents of ./dist/ to your hosting service
 ```
 

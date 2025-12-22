@@ -245,17 +245,22 @@ export class BundleOptimizer {
     }
 
     static preloadCriticalModules() {
-        // Preload critical modules
-        const criticalModules = [
-            'js/components/hero.js',
-            'js/state/appState.js'
-        ];
+        // In production builds, Vite handles module preloading automatically
+        // This function is kept for development compatibility but does nothing in production
+        if (import.meta.env?.DEV) {
+            // Only preload in development mode where individual modules exist
+            const criticalModules = [
+                'js/components/hero.js',
+                'js/state/appState.js'
+            ];
 
-        criticalModules.forEach(module => {
-            const link = document.createElement('link');
-            link.rel = 'modulepreload';
-            link.href = module;
-            document.head.appendChild(link);
-        });
+            criticalModules.forEach(module => {
+                const link = document.createElement('link');
+                link.rel = 'modulepreload';
+                link.href = module;
+                document.head.appendChild(link);
+            });
+        }
+        // In production, all modules are already bundled and optimized by Vite
     }
 }

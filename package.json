@@ -1,0 +1,41 @@
+{
+  "name": "personal-portfolio-website",
+  "version": "1.0.0",
+  "description": "Personal professional portfolio website showcasing achievements and thought leadership",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "python3 -m http.server 8000",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "lint": "eslint js/**/*.js",
+    "format": "prettier --write .",
+    "build:analyze": "vite build --mode analyze",
+    "deploy:preview": "npm run build && npm run preview"
+  },
+  "keywords": [
+    "portfolio",
+    "website",
+    "professional",
+    "responsive",
+    "javascript"
+  ],
+  "author": "Portfolio Owner",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/ui": "^1.0.0",
+    "eslint": "^8.0.0",
+    "fast-check": "^3.15.0",
+    "jsdom": "^23.0.0",
+    "prettier": "^3.0.0",
+    "terser": "^5.44.1",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

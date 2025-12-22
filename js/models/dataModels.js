@@ -5,7 +5,7 @@
  */
 export const ContentType = {
     TALK: 'talk',
-    BLOG: 'blog', 
+    BLOG: 'blog',
     WHITEPAPER: 'whitepaper',
     ARTICLE: 'article'
 };

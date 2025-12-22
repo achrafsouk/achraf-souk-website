@@ -7,7 +7,7 @@ export class AchievementsComponent {
 
     async render() {
         const achievements = this.state.getAchievements();
-        
+
         if (!this.achievementsGrid) {
             console.warn('Achievements grid element not found');
             return;
@@ -22,7 +22,7 @@ export class AchievementsComponent {
         const sortedAchievements = [...achievements].sort((a, b) => (a.order || 0) - (b.order || 0));
 
         // Generate achievement cards HTML
-        const achievementsHTML = sortedAchievements.map(achievement => 
+        const achievementsHTML = sortedAchievements.map(achievement =>
             this.createAchievementCard(achievement)
         ).join('');
 
@@ -31,7 +31,7 @@ export class AchievementsComponent {
 
     createAchievementCard(achievement) {
         const { id, title, description } = achievement;
-        
+
         return `
             <div class="achievement-card" data-achievement-id="${id || ''}">
                 <h3 class="achievement-title">${this.escapeHtml(title || 'Untitled Achievement')}</h3>

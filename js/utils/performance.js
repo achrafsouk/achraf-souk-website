@@ -4,7 +4,7 @@ export class PerformanceMonitor {
         this.metrics = new Map();
         this.observers = new Map();
         this.isSupported = 'performance' in window;
-        
+
         if (this.isSupported) {
             this.setupPerformanceObservers();
         }
@@ -162,8 +162,8 @@ export class PerformanceMonitor {
         link.rel = 'preload';
         link.href = href;
         link.as = as;
-        if (type) link.type = type;
-        
+        if (type) {link.type = type;}
+
         document.head.appendChild(link);
     }
 
@@ -172,7 +172,7 @@ export class PerformanceMonitor {
         const link = document.createElement('link');
         link.rel = 'prefetch';
         link.href = href;
-        
+
         document.head.appendChild(link);
     }
 

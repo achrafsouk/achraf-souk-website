@@ -14,7 +14,17 @@
     "lint": "eslint js/**/*.js",
     "format": "prettier --write .",
     "build:analyze": "vite build --mode analyze",
-    "deploy:preview": "npm run build && npm run preview"
+    "deploy:preview": "npm run build && npm run preview",
+    "verify:deployment": "node scripts/verify-deployment.js",
+    "verify:local": "node scripts/verify-deployment.js http://localhost:4173",
+    "deploy:build": "npm run lint:fix && npm run test && npm run build && npm run verify:build",
+    "deploy:production": "npm run deploy:build && npm run verify:deployment",
+    "deploy:staging": "npm run deploy:build && npm run verify:local",
+    "lint:fix": "eslint js/**/*.js --fix",
+    "verify:build": "node -e \"const fs=require('fs'); const path='dist'; if(!fs.existsSync(path)) throw new Error('Build failed: dist/ directory not found'); const files=fs.readdirSync(path); if(!files.includes('index.html')) throw new Error('Build failed: index.html not found'); if(!files.includes('assets')) throw new Error('Build failed: assets/ directory not found'); console.log('✓ Build verification passed');\"",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "npm run verify:build"
   },
   "keywords": [
     "portfolio",

@@ -11,7 +11,7 @@ export class AppState {
         this.itemsPerPage = 6;
         this.filteredContent = [];
         this.listeners = new Map();
-        
+
         // Load persisted state on initialization
         this.loadPersistedState();
     }
@@ -26,7 +26,7 @@ export class AppState {
 
         const profile = new Profile(profileData);
         const validation = profile.validate();
-        
+
         if (!validation.isValid) {
             console.warn('Invalid profile data:', validation.errors);
             throw new Error(`Profile validation failed: ${validation.errors.join(', ')}`);
@@ -50,7 +50,7 @@ export class AppState {
         }
 
         const validation = ValidationUtils.validateAchievements(achievementsData);
-        
+
         if (!validation.isValid) {
             console.warn('Invalid achievements data:', validation.errors);
             throw new Error(`Achievements validation failed: ${validation.errors.join(', ')}`);
@@ -74,7 +74,7 @@ export class AppState {
         }
 
         const validation = ValidationUtils.validateContentItems(contentData);
-        
+
         if (!validation.isValid) {
             console.warn('Invalid content data:', validation.errors);
             throw new Error(`Content validation failed: ${validation.errors.join(', ')}`);
@@ -93,7 +93,7 @@ export class AppState {
     // Filter methods
     setCurrentFilter(filter) {
         const validFilters = ['all', 'talk', 'blog', 'whitepaper', 'article'];
-        
+
         if (!validFilters.includes(filter)) {
             console.warn(`Invalid filter: ${filter}. Using 'all' instead.`);
             filter = 'all';
@@ -114,12 +114,12 @@ export class AppState {
     setCurrentPage(page) {
         const totalPages = this.getTotalPages();
         const newPage = Math.max(1, Math.min(page, totalPages || 1));
-        
+
         if (this.currentPage !== newPage) {
             this.currentPage = newPage;
-            this.notifyListeners('pagination', { 
-                currentPage: this.currentPage, 
-                totalPages: totalPages 
+            this.notifyListeners('pagination', {
+                currentPage: this.currentPage,
+                totalPages: totalPages
             });
             this.persistState();
         }
@@ -148,12 +148,12 @@ export class AppState {
     updateFilteredContent() {
         // Clear any cached data first to ensure fresh computation
         sessionStorage.removeItem('portfolioFilterCache');
-        
+
         // Compute filtered content
         if (this.currentFilter === 'all') {
             this.filteredContent = [...this.content];
         } else {
-            this.filteredContent = this.content.filter(item => 
+            this.filteredContent = this.content.filter(item =>
                 item.type === this.currentFilter
             );
         }
@@ -178,7 +178,7 @@ export class AppState {
 
         // Always notify listeners of the change
         this.notifyListeners('filteredContent', this.filteredContent);
-        
+
         // Cache the computed data for performance
         this.cacheComputedData();
     }
@@ -222,7 +222,7 @@ export class AppState {
                 timestamp: Date.now()
             };
             localStorage.setItem('portfolioAppState', JSON.stringify(stateToSave));
-            
+
             // Also cache computed data for performance
             this.cacheComputedData();
         } catch (error) {
@@ -245,7 +245,7 @@ export class AppState {
                 filter: this.currentFilter,
                 timestamp: Date.now()
             };
-            
+
             // Only cache if data is reasonable size
             const cacheString = JSON.stringify(cacheData);
             if (cacheString.length < 50000) { // 50KB limit
@@ -261,7 +261,7 @@ export class AppState {
             const cached = sessionStorage.getItem('portfolioFilterCache');
             if (cached) {
                 const cacheData = JSON.parse(cached);
-                
+
                 // Check if cache is still valid (5 minutes)
                 if (Date.now() - cacheData.timestamp < 5 * 60 * 1000) {
                     // Check if filter matches
@@ -285,7 +285,7 @@ export class AppState {
             const savedState = localStorage.getItem('portfolioAppState');
             if (savedState) {
                 const state = JSON.parse(savedState);
-                
+
                 // Only restore preferences, not data
                 if (state.currentFilter) {
                     this.currentFilter = state.currentFilter;

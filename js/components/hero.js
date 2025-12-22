@@ -9,7 +9,7 @@ export class HeroComponent {
         this.heroTitle = document.querySelector('.hero-title');
         this.initialsSpan = document.querySelector('.initials');
         this.heroSection = document.querySelector('.hero-section');
-        
+
         // Initialize background image handling
         this.initializeBackgroundImage();
     }
@@ -33,7 +33,7 @@ export class HeroComponent {
 
     async render() {
         const profile = this.state.getProfile();
-        
+
         if (!profile) {
             console.warn('No profile data available');
             return;
@@ -43,7 +43,7 @@ export class HeroComponent {
         if (this.heroTitle && profile.name) {
             this.heroTitle.textContent = `Hi, I'm ${profile.name}`;
         }
-        
+
         if (this.bioText && profile.bio) {
             this.bioText.textContent = profile.bio;
         }
@@ -58,7 +58,7 @@ export class HeroComponent {
     }
 
     setupProfileImage(profile) {
-        if (!this.profileImage || !this.profileFallback) return;
+        if (!this.profileImage || !this.profileFallback) {return;}
 
         // Set up fallback initials
         if (this.initialsSpan && profile.profileImage?.fallbackInitials) {
@@ -180,10 +180,10 @@ export class HeroComponent {
                 const ctx = canvas.getContext('2d');
                 canvas.width = imgElement.naturalWidth;
                 canvas.height = imgElement.naturalHeight;
-                
+
                 ctx.drawImage(imgElement, 0, 0);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                
+
                 // Check size before caching (limit to 100KB)
                 if (dataUrl.length < 100000) {
                     const cacheData = {

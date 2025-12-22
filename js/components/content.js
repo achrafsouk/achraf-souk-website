@@ -5,13 +5,13 @@ export class ContentComponent {
         this.contentGrid = document.getElementById('content-grid');
         this.paginationControls = document.getElementById('pagination-controls');
         this.filterButtons = document.querySelectorAll('.filter-btn');
-        
+
         this.setupEventListeners();
         this.setupStateListeners();
-        
+
         // Initialize filter button states immediately
         this.updateFilterButtonStates(this.state.getCurrentFilter());
-        
+
         // If content already exists, render immediately
         if (this.state.getContent().length > 0) {
             this.render();
@@ -84,16 +84,16 @@ export class ContentComponent {
         } else {
             // Use document fragment for better performance
             const fragment = document.createDocumentFragment();
-            
+
             pageContent.forEach((item, index) => {
                 const cardElement = this.createContentCardElement(item);
-                
+
                 // Stagger card animations for better perceived performance
                 cardElement.style.animationDelay = `${index * 50}ms`;
-                
+
                 fragment.appendChild(cardElement);
             });
-            
+
             // Clear and append all at once
             this.contentGrid.innerHTML = '';
             this.contentGrid.appendChild(fragment);
@@ -116,7 +116,7 @@ export class ContentComponent {
         const cardDiv = document.createElement('div');
         cardDiv.className = `content-card ${item.externalLink ? 'clickable' : ''}`;
         cardDiv.dataset.contentId = item.id || '';
-        
+
         if (item.externalLink) {
             cardDiv.dataset.externalLink = item.externalLink;
             cardDiv.setAttribute('tabindex', '0');
@@ -125,7 +125,7 @@ export class ContentComponent {
 
         const formattedDate = this.formatDate(item.publicationDate);
         const truncatedDescription = this.truncateToFirstLine(item.description || 'No description available.');
-        
+
         cardDiv.innerHTML = `
             <div class="content-meta">
                 <span class="content-type">${this.escapeHtml(item.type || 'article')}</span>
@@ -160,12 +160,12 @@ export class ContentComponent {
 
     setupContentCardListeners() {
         const clickableCards = this.contentGrid.querySelectorAll('.content-card.clickable');
-        
+
         // Debounce click handlers to prevent double-clicks
         const debouncedClick = this.debounce((externalLink) => {
             window.open(externalLink, '_blank', 'noopener,noreferrer');
         }, 300);
-        
+
         clickableCards.forEach(card => {
             const handleClick = () => {
                 const externalLink = card.dataset.externalLink;
@@ -175,7 +175,7 @@ export class ContentComponent {
             };
 
             card.addEventListener('click', handleClick);
-            
+
             // Keyboard accessibility
             card.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -216,7 +216,7 @@ export class ContentComponent {
     }
 
     renderPagination() {
-        if (!this.paginationControls) return;
+        if (!this.paginationControls) {return;}
 
         const totalPages = this.state.getTotalPages();
         const currentPage = this.state.getCurrentPage();
@@ -270,8 +270,8 @@ export class ContentComponent {
     }
 
     formatDate(dateString) {
-        if (!dateString) return 'No date';
-        
+        if (!dateString) {return 'No date';}
+
         try {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', {
@@ -291,15 +291,15 @@ export class ContentComponent {
     }
 
     truncateToFirstLine(text) {
-        if (!text) return '';
-        
+        if (!text) {return '';}
+
         // Split by common sentence endings and line breaks
         const sentences = text.split(/[.!?]\s+|\n/);
-        
+
         // Get the first sentence/line
         let firstLine = sentences[0].trim();
-        
-        // If the first sentence is very short (less than 30 chars), 
+
+        // If the first sentence is very short (less than 30 chars),
         // try to include the next sentence if it exists and the total is reasonable
         if (firstLine.length < 30 && sentences.length > 1 && sentences[1]) {
             const secondSentence = sentences[1].trim();
@@ -308,18 +308,18 @@ export class ContentComponent {
                 firstLine = combined;
             }
         }
-        
+
         // If still very long, truncate at word boundary
         if (firstLine.length > 120) {
             const words = firstLine.split(' ');
             let truncated = '';
             for (const word of words) {
-                if ((truncated + ' ' + word).length > 120) break;
+                if ((truncated + ' ' + word).length > 120) {break;}
                 truncated += (truncated ? ' ' : '') + word;
             }
             firstLine = truncated;
         }
-        
+
         // Add ellipsis if we truncated or if there's more content
         const needsEllipsis = firstLine.length < text.length || sentences.length > 1;
         return needsEllipsis ? firstLine + '...' : firstLine;

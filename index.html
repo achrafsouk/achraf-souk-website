@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal professional portfolio showcasing achievements and thought leadership">
+    <title>Personal Portfolio</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Skip link for keyboard navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section" aria-label="Personal introduction">
+        <div class="container">
+            <div class="hero-content">
+                <div class="profile-image-container">
+                    <img id="profile-image" class="profile-image" src="" alt="Profile picture" />
+                    <div id="profile-fallback" class="profile-fallback hidden" aria-hidden="true">
+                        <span class="initials"></span>
+                    </div>
+                </div>
+                <div class="hero-text">
+                    <h1 class="hero-title">Welcome to My Portfolio</h1>
+                    <p class="bio-text">Professional bio content will be displayed here.</p>
+                    <a href="#" id="linkedin-link" class="linkedin-link" target="_blank" rel="noopener noreferrer" aria-label="Connect with me on LinkedIn">
+                        Follow me on LinkedIn !
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievements Section -->
+    <section id="achievements" class="achievements-section" aria-label="Professional achievements">
+        <div class="container">
+            <h2 class="section-title">Achievements</h2>
+            <div id="achievements-grid" class="achievements-grid">
+                <!-- Achievement cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Section -->
+    <main id="main-content">
+    <section id="content" class="content-section" aria-label="Thought leadership content">
+        <div class="container">
+            <h2 class="section-title">Thought Leadership</h2>
+            
+            <!-- Filter Controls -->
+            <div class="filter-controls" role="group" aria-label="Content filters">
+                <button id="filter-all" class="filter-btn active" data-filter="all" aria-pressed="true" aria-label="Show all content types">All</button>
+                <button id="filter-talks" class="filter-btn" data-filter="talk" aria-pressed="false" aria-label="Show talks only">Talks</button>
+                <button id="filter-blogs" class="filter-btn" data-filter="blog" aria-pressed="false" aria-label="Show blogs only">Blogs</button>
+                <button id="filter-whitepapers" class="filter-btn" data-filter="whitepaper" aria-pressed="false" aria-label="Show whitepapers only">Whitepapers</button>
+            </div>
+
+            <!-- Content Grid -->
+            <div id="content-grid" class="content-grid">
+                <!-- Content cards will be dynamically inserted here -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <nav class="pagination" aria-label="Content pagination" role="navigation">
+                <div id="pagination-controls" class="pagination-controls">
+                    <!-- Pagination buttons will be dynamically inserted here -->
+                </div>
+            </nav>
+        </div>
+    </section>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

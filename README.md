@@ -168,6 +168,3 @@ Add your thought leadership content to the `content` array:
 - Safari 14+
 - Edge 90+
 
-## License
-
-MIT License - see LICENSE file for details

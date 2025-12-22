@@ -433,7 +433,7 @@ export const sampleData = {
             type: "blog",
             publicationDate: "2025-04-17",
             description: "In this post, you’ll learn how the Anti-DDoS AMR works, and how you can customize its behavior using labels and additional AWS WAF rules. You’ll walk through three practical scenarios, each demonstrating a different customization technique.",
-            externalLink: "https://staging.prod.website.marketing.aws.dev/blogs/security/how-to-customize-your-response-to-layer-7-ddos-attacks-using-aws-waf-anti-ddos-amr/"
+            externalLink: "https://aws.amazon.com/blogs/security/how-to-customize-your-response-to-layer-7-ddos-attacks-using-aws-waf-anti-ddos-amr/"
         },
         {
             id: "content-47",

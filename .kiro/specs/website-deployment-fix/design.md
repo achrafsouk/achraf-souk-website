@@ -11,13 +11,15 @@ The fix requires updating deployment configuration, verifying the build process 
 ### Current Problem Analysis
 - **Issue**: Website serves files from project root instead of `dist/` directory
 - **Symptoms**: 404 errors for JavaScript modules like `js/state/appState.js`
-- **Root Cause**: Deployment configuration points to wrong directory
-- **Impact**: Website fails to load JavaScript functionality
+- **Hero Banner Issue**: CSS uses hardcoded path `/public/images/hero-banner.jpg` which doesn't exist in built output
+- **Root Cause**: Deployment configuration points to wrong directory and CSS asset references aren't processed by Vite
+- **Impact**: Website fails to load JavaScript functionality and hero banner background image
 
 ### Solution Architecture
 - **Build Process**: Vite processes source files and outputs to `dist/` directory
 - **Deployment Target**: Web server document root should point to `dist/` directory
 - **Asset Management**: All assets (JS, CSS, images) served from built files
+- **Asset Reference Fix**: Import hero banner image in JavaScript and set CSS background dynamically
 - **Caching Strategy**: Proper cache headers for optimized performance
 
 ### Technology Stack
@@ -62,6 +64,24 @@ build: {
 - Relative paths for portability
 - Proper asset copying from source to dist
 - Image optimization and compression
+
+### Hero Banner Asset Component
+**Purpose**: Fix hero banner background image loading
+**Key Features**:
+- Import hero banner image in JavaScript using Vite's asset handling
+- Dynamically set CSS background-image property with correct asset path
+- Maintain fallback gradient background for loading states
+- Ensure image is processed and copied to dist/assets/ with proper hashing
+
+**Implementation Approach**:
+```javascript
+// Import image using Vite's asset handling
+import heroBannerUrl from '/public/images/hero-banner.jpg';
+
+// Set background image dynamically
+document.querySelector('.hero-section').style.backgroundImage = 
+  `linear-gradient(...), url('${heroBannerUrl}')`;
+```
 
 ## Data Models
 
@@ -114,8 +134,10 @@ BuildState {
 ### Property Reflection
 
 After analyzing the acceptance criteria, several properties can be consolidated:
-- Asset loading properties (1.2, 2.1, 2.2, 2.3) all relate to ensuring built files are properly served
-- Build completeness properties (2.4, 3.3) both verify that the build process generates all necessary files
+- Asset loading properties (1.2, 1.4, 2.1, 2.2, 2.3) all relate to ensuring built files are properly served
+- Build completeness properties (2.4, 3.3, 4.2) verify that the build process generates all necessary files
+- Asset reference properties (2.5, 4.4) both test that asset paths are correctly processed
+- Hero banner properties (1.4, 4.3) are duplicates testing the same behavior
 - These properties provide comprehensive coverage of the deployment fix without redundancy
 
 ### Core Properties
@@ -138,7 +160,15 @@ After analyzing the acceptance criteria, several properties can be consolidated:
 
 **Property 5: Build completeness**
 *For any* successful build process, all required files (HTML, JS, CSS, images, static assets) should exist in the dist/ directory
-**Validates: Requirements 2.4, 3.3**
+**Validates: Requirements 2.4, 3.3, 4.2**
+
+**Property 6: Hero banner image loading**
+*For any* deployed website, the hero section should display the background image without 404 errors and the image URL should resolve to an existing asset
+**Validates: Requirements 1.4, 4.3**
+
+**Property 7: Asset reference processing**
+*For any* asset reference in the source code, after the build process it should resolve to a valid file path in the dist/ directory
+**Validates: Requirements 2.5, 4.4**
 
 ## Error Handling
 

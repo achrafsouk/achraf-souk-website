@@ -74,8 +74,7 @@ section {
 /* Hero Section - Mobile First */
 .hero-section {
     background: 
-        linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 50%, rgba(240, 147, 251, 0.8) 100%),
-        url('/public/images/hero-banner.jpg') center center / cover no-repeat;
+        linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 50%, rgba(240, 147, 251, 0.8) 100%);
     color: white;
     padding: 3rem 0;
     text-align: center;
@@ -84,6 +83,9 @@ section {
     align-items: center;
     position: relative;
     overflow: hidden;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .hero-section::before {

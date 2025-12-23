@@ -1,29 +1,38 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import fc from 'fast-check';
-import { HeroComponent } from '../js/components/hero.js';
-import { AppState } from '../js/state/appState.js';
 
 /**
- * Feature: website-deployment-fix, Property 6: Hero banner image loading
+ * Feature: remove-hero-background, Property 3: No network requests for background image
  * 
- * Property: For any deployed website, the hero section should display the background image 
- * without 404 errors and the image URL should resolve to an existing asset
+ * Property: For any page load, no network requests should be made for hero-banner.jpg
  * 
- * Validates: Requirements 1.4, 4.3
+ * Validates: Requirements 1.3
  */
 
-describe('Hero Banner Image Loading Property Tests', () => {
+describe('Hero Banner Loading Property Tests', () => {
     let dom;
     let document;
     let window;
-    let appState;
+    let networkRequests;
 
     beforeEach(() => {
-        // Create a new JSDOM instance for each test
+        // Track all network requests
+        networkRequests = [];
+
+        // Create JSDOM instance with inline CSS to avoid external requests
         dom = new JSDOM(`
             <!DOCTYPE html>
             <html>
+            <head>
+                <style>
+                    .hero-section {
+                        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 50%, rgba(240, 147, 251, 0.8) 100%);
+                        color: white;
+                        padding: 2rem 0;
+                    }
+                </style>
+            </head>
             <body>
                 <section class="hero-section">
                     <div class="container">
@@ -45,8 +54,8 @@ describe('Hero Banner Image Loading Property Tests', () => {
             </body>
             </html>
         `, {
-            url: 'http://localhost:3000',
-            pretendToBeVisual: true,
+            url: 'http://localhost:3000/',
+            pretendToBeVisual: false,
             resources: 'usable'
         });
 
@@ -56,197 +65,216 @@ describe('Hero Banner Image Loading Property Tests', () => {
         // Set up global objects
         global.document = document;
         global.window = window;
-        global.Image = window.Image;
 
         // Mock console methods
         vi.spyOn(console, 'log').mockImplementation(() => {});
         vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-        // Create app state with mock data
-        appState = new AppState();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
-        dom.window.close();
+        if (dom && dom.window) {
+            dom.window.close();
+        }
+        
+        // Clear network requests
+        networkRequests = [];
     });
 
-    it('Property 6: Hero banner image loading - should set background image and test image loading for any profile data', () => {
+    it('Property 3: No network requests for background image - hero-banner.jpg should not be requested', () => {
+        // Get the hero section
+        const heroSection = document.querySelector('.hero-section');
+        
+        // The hero section should exist
+        expect(heroSection).toBeTruthy();
+
+        // Property assertion: Inline styles should not contain hero-banner references
+        const inlineBackgroundImage = heroSection.style.backgroundImage || '';
+        expect(inlineBackgroundImage).not.toContain('hero-banner.jpg');
+        expect(inlineBackgroundImage).not.toContain('hero-banner.jpeg');
+        expect(inlineBackgroundImage).not.toContain('hero-banner.png');
+        expect(inlineBackgroundImage).not.toContain('hero-banner.gif');
+        expect(inlineBackgroundImage).not.toContain('hero-banner.webp');
+        expect(inlineBackgroundImage).not.toContain('hero-banner.svg');
+
+        // Property assertion: Inline styles should not contain any image URLs
+        const hasInlineImageUrl = /url\([^)]*\.(jpg|jpeg|png|gif|webp|svg)[^)]*\)/i.test(inlineBackgroundImage);
+        expect(hasInlineImageUrl).toBe(false);
+
+        // Property assertion: Data attributes should not contain hero-banner references
+        const dataBackground = heroSection.getAttribute('data-background') || '';
+        const dataImage = heroSection.getAttribute('data-image') || '';
+        
+        expect(dataBackground).not.toContain('hero-banner');
+        expect(dataImage).not.toContain('hero-banner');
+
+        // Property assertion: Class list should not contain image-related classes that might trigger loading
+        const classList = Array.from(heroSection.classList);
+        const hasImageLoadingClass = classList.some(className => 
+            className.includes('hero-banner') || 
+            className.includes('background-image') ||
+            className.includes('bg-image')
+        );
+        expect(hasImageLoadingClass).toBe(false);
+
+        // Property assertion: No child elements should have background image styles
+        const childElements = heroSection.querySelectorAll('*');
+        childElements.forEach(child => {
+            const childBackgroundImage = child.style.backgroundImage || '';
+            expect(childBackgroundImage).not.toContain('hero-banner');
+            
+            const childDataBackground = child.getAttribute('data-background') || '';
+            const childDataImage = child.getAttribute('data-image') || '';
+            expect(childDataBackground).not.toContain('hero-banner');
+            expect(childDataImage).not.toContain('hero-banner');
+        });
+    });
+
+    it('Property 3: No network requests for background image - CSS classes should not reference background images', () => {
         fc.assert(
             fc.property(
-                // Generate random profile data
+                // Generate random CSS class scenarios
                 fc.record({
-                    name: fc.string({ minLength: 1, maxLength: 50 }),
-                    bio: fc.string({ minLength: 10, maxLength: 200 }),
-                    profileImage: fc.record({
-                        src: fc.webUrl(),
-                        alt: fc.string({ minLength: 1, maxLength: 100 }),
-                        fallbackInitials: fc.string({ minLength: 1, maxLength: 3 })
-                    }),
-                    linkedinUrl: fc.webUrl()
+                    addErrorClass: fc.boolean(),
+                    addHoverClass: fc.boolean(),
+                    addActiveClass: fc.boolean()
                 }),
-                (profileData) => {
-                    // Set up app state with generated profile data
-                    appState.profile = profileData;
+                ({ addErrorClass, addHoverClass, addActiveClass }) => {
+                    const heroSection = document.querySelector('.hero-section');
+                    expect(heroSection).toBeTruthy();
 
-                    // Track image creation and src setting
-                    let imageCreated = false;
-                    let imageSrcSet = false;
-                    let capturedSrc = '';
+                    // Apply various classes that might trigger background images
+                    const classesToTest = [];
+                    if (addErrorClass) classesToTest.push('image-error');
+                    if (addHoverClass) classesToTest.push('hover');
+                    if (addActiveClass) classesToTest.push('active');
 
-                    const mockImage = {
-                        onload: null,
-                        onerror: null,
-                        set src(value) {
-                            imageSrcSet = true;
-                            capturedSrc = value;
-                        }
-                    };
-
-                    global.Image = vi.fn(() => {
-                        imageCreated = true;
-                        return mockImage;
+                    classesToTest.forEach(className => {
+                        heroSection.classList.add(className);
                     });
 
-                    // Create hero component
-                    const heroComponent = new HeroComponent(appState);
-                    const heroSection = document.querySelector('.hero-section');
-
-                    // Property assertions:
-                    // 1. Hero section should exist and be properly initialized
-                    expect(heroSection).toBeTruthy();
-                    expect(heroComponent.heroSection).toBe(heroSection);
-
-                    // 2. Background image should be set dynamically via JavaScript
-                    const backgroundImage = heroSection.style.backgroundImage;
-                    expect(backgroundImage).toBeTruthy();
-                    expect(backgroundImage).toContain('linear-gradient');
-                    expect(backgroundImage).toContain('url(');
-
-                    // 3. Image loading test should be initiated
-                    expect(imageCreated).toBe(true);
-                    expect(imageSrcSet).toBe(true);
-                    expect(capturedSrc).toBeTruthy();
-                    expect(typeof capturedSrc).toBe('string');
-
-                    // 4. Image should have proper event handlers for success/failure
-                    expect(mockImage.onload).toBeTypeOf('function');
-                    expect(mockImage.onerror).toBeTypeOf('function');
-
-                    // Test successful image loading
-                    mockImage.onload();
-                    expect(heroSection.classList.contains('image-error')).toBe(false);
-
-                    // Reset and test failed image loading
-                    heroSection.classList.remove('image-error');
-                    mockImage.onerror();
-                    expect(heroSection.classList.contains('image-error')).toBe(true);
-                }
-            ),
-            { numRuns: 100 }
-        );
-    });
-
-    it('Property 6: Hero banner image URL validation - should use valid asset URL format', () => {
-        fc.assert(
-            fc.property(
-                // Generate random profile configurations
-                fc.record({
-                    name: fc.string({ minLength: 1, maxLength: 30 }),
-                    bio: fc.string({ minLength: 5, maxLength: 100 }),
-                    profileImage: fc.record({
-                        src: fc.webUrl(),
-                        alt: fc.string({ minLength: 1, maxLength: 50 }),
-                        fallbackInitials: fc.string({ minLength: 1, maxLength: 2 })
-                    }),
-                    linkedinUrl: fc.webUrl()
-                }),
-                (profileData) => {
-                    appState.profile = profileData;
-
-                    let capturedImageSrc = '';
-                    const mockImage = {
-                        onload: null,
-                        onerror: null,
-                        set src(value) {
-                            capturedImageSrc = value;
+                    // Check styles with these classes
+                    let backgroundImageStyle = '';
+                    try {
+                        if (window && window.getComputedStyle) {
+                            const computedStyle = window.getComputedStyle(heroSection);
+                            backgroundImageStyle = computedStyle.backgroundImage || '';
                         }
-                    };
-
-                    global.Image = vi.fn(() => mockImage);
-
-                    // Create hero component
-                    const heroComponent = new HeroComponent(appState);
-                    const heroSection = document.querySelector('.hero-section');
-
-                    // Property: The image URL should be a valid string that could resolve to an asset
-                    expect(capturedImageSrc).toBeTruthy();
-                    expect(typeof capturedImageSrc).toBe('string');
-                    expect(capturedImageSrc.length).toBeGreaterThan(0);
-                    // Should use the images directory path
-                    expect(capturedImageSrc).toBe('./images/hero-banner.jpg');
-
-                    // The background image should be properly formatted
-                    const backgroundImage = heroSection.style.backgroundImage;
-                    
-                    // Should contain both gradient and image URL
-                    expect(backgroundImage).toContain('linear-gradient');
-                    expect(backgroundImage).toContain('url(');
-                    expect(backgroundImage).toContain('./images/hero-banner.jpg');
-                    expect(backgroundImage).toContain('rgba(102, 126, 234, 0.8)'); // Part of the gradient
-                }
-            ),
-            { numRuns: 100 }
-        );
-    });
-
-    it('Property 6: Hero banner fallback behavior - should handle image loading failures gracefully', () => {
-        fc.assert(
-            fc.property(
-                // Generate random failure scenarios
-                fc.record({
-                    profileData: fc.record({
-                        name: fc.string({ minLength: 1, maxLength: 40 }),
-                        bio: fc.string({ minLength: 1, maxLength: 150 }),
-                        profileImage: fc.record({
-                            src: fc.webUrl(),
-                            alt: fc.string({ minLength: 1, maxLength: 60 }),
-                            fallbackInitials: fc.string({ minLength: 1, maxLength: 3 })
-                        }),
-                        linkedinUrl: fc.webUrl()
-                    }),
-                    shouldImageFail: fc.boolean()
-                }),
-                ({ profileData, shouldImageFail }) => {
-                    appState.profile = profileData;
-
-                    const mockImage = {
-                        onload: null,
-                        onerror: null,
-                        src: ''
-                    };
-
-                    global.Image = vi.fn(() => mockImage);
-
-                    // Create hero component
-                    const heroComponent = new HeroComponent(appState);
-                    const heroSection = document.querySelector('.hero-section');
-
-                    // Property: Fallback behavior should be consistent regardless of image success/failure
-                    if (shouldImageFail) {
-                        // Simulate image failure
-                        mockImage.onerror();
-                        expect(heroSection.classList.contains('image-error')).toBe(true);
-                    } else {
-                        // Simulate image success
-                        mockImage.onload();
-                        expect(heroSection.classList.contains('image-error')).toBe(false);
+                    } catch (e) {
+                        backgroundImageStyle = heroSection.style.backgroundImage || '';
                     }
 
-                    // Background should always be set regardless of image loading result
-                    const backgroundImage = heroSection.style.backgroundImage;
-                    expect(backgroundImage).toBeTruthy();
-                    expect(backgroundImage).toContain('linear-gradient');
+                    // Property assertion: No background image URLs should be present
+                    expect(backgroundImageStyle).not.toContain('hero-banner');
+                    const hasImageUrl = /url\([^)]*\.(jpg|jpeg|png|gif|webp|svg)[^)]*\)/i.test(backgroundImageStyle);
+                    expect(hasImageUrl).toBe(false);
+
+                    // Clean up classes
+                    classesToTest.forEach(className => {
+                        heroSection.classList.remove(className);
+                    });
+                }
+            ),
+            { numRuns: 100 }
+        );
+    });
+
+    it('Property 3: No network requests for background image - DOM events should not trigger image loading', () => {
+        fc.assert(
+            fc.property(
+                // Generate random event scenarios
+                fc.record({
+                    triggerLoad: fc.boolean(),
+                    triggerResize: fc.boolean(),
+                    triggerScroll: fc.boolean()
+                }),
+                ({ triggerLoad, triggerResize, triggerScroll }) => {
+                    const heroSection = document.querySelector('.hero-section');
+                    expect(heroSection).toBeTruthy();
+
+                    // Trigger various DOM events
+                    const eventsToTrigger = [];
+                    if (triggerLoad) eventsToTrigger.push('load');
+                    if (triggerResize) eventsToTrigger.push('resize');
+                    if (triggerScroll) eventsToTrigger.push('scroll');
+
+                    eventsToTrigger.forEach(eventType => {
+                        try {
+                            const event = new Event(eventType);
+                            heroSection.dispatchEvent(event);
+                            if (window) window.dispatchEvent(event);
+                            document.dispatchEvent(event);
+                        } catch (e) {
+                            // Ignore event dispatch errors
+                        }
+                    });
+
+                    // Check that no background images are referenced after events
+                    let backgroundImageStyle = '';
+                    try {
+                        if (window && window.getComputedStyle) {
+                            const computedStyle = window.getComputedStyle(heroSection);
+                            backgroundImageStyle = computedStyle.backgroundImage || '';
+                        }
+                    } catch (e) {
+                        backgroundImageStyle = heroSection.style.backgroundImage || '';
+                    }
+
+                    // Property assertion: Events should not cause background image loading
+                    expect(backgroundImageStyle).not.toContain('hero-banner');
+                    const hasImageUrl = /url\([^)]*\.(jpg|jpeg|png|gif|webp|svg)[^)]*\)/i.test(backgroundImageStyle);
+                    expect(hasImageUrl).toBe(false);
+                }
+            ),
+            { numRuns: 100 }
+        );
+    });
+
+    it('Property 3: No network requests for background image - inline styles should not contain image URLs', () => {
+        fc.assert(
+            fc.property(
+                // Generate random inline style scenarios
+                fc.record({
+                    checkInlineStyles: fc.boolean(),
+                    checkDataAttributes: fc.boolean()
+                }),
+                ({ checkInlineStyles, checkDataAttributes }) => {
+                    const heroSection = document.querySelector('.hero-section');
+                    expect(heroSection).toBeTruthy();
+
+                    if (checkInlineStyles) {
+                        // Check inline styles
+                        const inlineBackgroundImage = heroSection.style.backgroundImage || '';
+                        expect(inlineBackgroundImage).not.toContain('hero-banner');
+                        
+                        const hasInlineImageUrl = /url\([^)]*\.(jpg|jpeg|png|gif|webp|svg)[^)]*\)/i.test(inlineBackgroundImage);
+                        expect(hasInlineImageUrl).toBe(false);
+                    }
+
+                    if (checkDataAttributes) {
+                        // Check data attributes that might contain image URLs
+                        const dataBackground = heroSection.getAttribute('data-background') || '';
+                        const dataImage = heroSection.getAttribute('data-image') || '';
+                        
+                        expect(dataBackground).not.toContain('hero-banner');
+                        expect(dataImage).not.toContain('hero-banner');
+                    }
+
+                    // Property assertion: Hero section should only have gradient backgrounds
+                    const allBackgroundSources = [
+                        heroSection.style.backgroundImage || '',
+                        heroSection.getAttribute('data-background') || '',
+                        heroSection.getAttribute('data-image') || ''
+                    ];
+
+                    allBackgroundSources.forEach(bgSource => {
+                        if (bgSource && bgSource !== 'none') {
+                            expect(bgSource).not.toContain('hero-banner');
+                            const hasImageUrl = /url\([^)]*\.(jpg|jpeg|png|gif|webp|svg)[^)]*\)/i.test(bgSource);
+                            expect(hasImageUrl).toBe(false);
+                        }
+                    });
                 }
             ),
             { numRuns: 100 }

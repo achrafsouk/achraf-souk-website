@@ -10,41 +10,10 @@ export class HeroComponent {
         this.initialsSpan = document.querySelector('.initials');
         this.heroSection = document.querySelector('.hero-section');
 
-        // Initialize background image handling
-        this.initializeBackgroundImage();
+
     }
 
-    initializeBackgroundImage() {
-        // Set the background image dynamically using the copied asset path
-        if (this.heroSection) {
-            const currentBackground = getComputedStyle(this.heroSection).backgroundImage;
-            // Preserve the existing gradient and add the hero banner image
-            const gradientPart = 'linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 50%, rgba(240, 147, 251, 0.8) 100%)';
-            const heroBannerUrl = './images/hero-banner.jpg';
-            this.heroSection.style.backgroundImage = `${gradientPart}, url('${heroBannerUrl}')`;
-            this.heroSection.style.backgroundPosition = 'center center, center center';
-            this.heroSection.style.backgroundSize = 'cover, cover';
-            this.heroSection.style.backgroundRepeat = 'no-repeat, no-repeat';
-        }
 
-        // Test if background image loads successfully
-        const testImage = new Image();
-        testImage.onload = () => {
-            // Image loaded successfully, remove any error class
-            console.log('Hero background image loaded successfully');
-            if (this.heroSection) {
-                this.heroSection.classList.remove('image-error');
-            }
-        };
-        testImage.onerror = () => {
-            // Image failed to load, apply fallback class
-            console.warn('Hero background image failed to load, using fallback');
-            if (this.heroSection) {
-                this.heroSection.classList.add('image-error');
-            }
-        };
-        testImage.src = './images/hero-banner.jpg';
-    }
 
     async render() {
         const profile = this.state.getProfile();

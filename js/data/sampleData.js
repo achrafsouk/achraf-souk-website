@@ -483,6 +483,15 @@ export const sampleData = {
             description: "Discover how to enhance cloud security across your development and production lifecycle. Explore AWS's comprehensive security approach—from identification and prevention to detection, response, and remediation. Learn to integrate security-by-design principles and use advanced detection capabilities. See how generative AI enhances security analysis and automation. Gain insights into building resilient architectures that evolve with emerging threats.",
             externalLink: 'content/slides-aws-dubai-summit-2025-security-at-scale-from-development-to-production.pdf'
         },
+        {
+            id: 'content-53',
+            title: 'DGA Innovation Hub KSA - Building Secure Generative AI Applications',
+            type: 'talk',
+            publicationDate: '2026-02-13',
+            description: "Understand risks related to GenAI technologies, and how you can address them.",
+            externalLink: 'content/slides-building-secure-generative-ai-applications.pdf'
+        }
+        
     ]
 };
 
